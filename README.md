@@ -22,7 +22,7 @@ This is a minimal WebRTC demo project using [`turnix-js`](https://www.npmjs.com/
 
 ```bash
 git clone https://github.com/turnixio/turnix-js-demo.git
-cd turnix-webrtc-demo
+cd turnix-js-demo
 npm install
 ```
 
