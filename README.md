@@ -13,19 +13,6 @@ This is a minimal WebRTC demo project using [`turnix-js`](https://www.npmjs.com/
 - ✅ A **free account** at [https://turnix.io](https://turnix.io)
 - 🔐 A **Bearer API token** from the TURNIX dashboard
 
----
-
-## 📁 Project Structure
-
-```
-turnix-webrtc-demo/
-├── server.js             # Node.js server with TURN credential logic and signaling
-├── public/
-│   ├── sender.html       # Captures and streams local camera
-│   └── receiver.html     # Receives and displays the video
-├── package.json
-└── README.md
-```
 
 ---
 
@@ -34,7 +21,7 @@ turnix-webrtc-demo/
 ### 1. Clone and install dependencies
 
 ```bash
-git clone https://github.com/yourname/turnix-webrtc-demo.git
+git clone https://github.com/turnixio/turnix-js-demo.git
 cd turnix-webrtc-demo
 npm install
 ```
