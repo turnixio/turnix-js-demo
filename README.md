@@ -8,6 +8,11 @@ This is a minimal WebRTC demo project using [`turnix-js`](https://www.npmjs.com/
 
 ---
 
+## ⚙️ Prerequisites
+
+- ✅ A **free account** at [https://turnix.io](https://turnix.io)
+- 🔐 A **Bearer API token** from the TURNIX dashboard
+
 ## 📁 Project Structure
 
 ```
