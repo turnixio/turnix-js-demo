@@ -1,0 +1,35 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor-specific
+.idea/
+.vscode/
+*.swp
+
+# Logs
+logs/
+*.log
+
+# Runtime
+*.pid
+*.seed
+*.tgz
+
+# Build artifacts (if later added)
+dist/
+build/
+out/
+
+# Optional: public media cache
+public/*.webm
+public/*.mp4
+public/*.png

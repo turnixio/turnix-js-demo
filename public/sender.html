@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head><title>Sender</title></head>
+<body>
+<h2>Sender</h2>
+<video id="localVideo" autoplay muted playsinline style="width: 480px;"></video>
+
+<script type="module">
+    const localVideo = document.getElementById('localVideo');
+    const signaling = new WebSocket('ws://localhost:3000?room=room1');
+
+    signaling.onopen = async () => {
+        console.log("✅ Signaling connected");
+
+        const res = await fetch('/ice', { method: 'POST' });
+        const { iceServers } = await res.json();
+
+        // Filter TURN-only entries (turns: only)
+        const relayOnly = iceServers.filter(s =>
+            s.urls.some(url => url.startsWith("turn:") || url.startsWith("turns:"))
+        );
+
+        const pc = new RTCPeerConnection({
+            iceServers: relayOnly,
+            iceTransportPolicy: "relay"
+        });
+
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = stream;
+        stream.getTracks().forEach(t => pc.addTrack(t, stream));
+
+        pc.onicecandidate = (e) => {
+            if (e.candidate) signaling.send(JSON.stringify({ candidate: e.candidate }));
+        };
+
+        pc.onconnectionstatechange = () => {
+            console.log("🔄 Connection state:", pc.connectionState);
+        };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        // Send ICE config and SDP offer to receiver
+        signaling.send(JSON.stringify({
+            type: "offer",
+            sdp: pc.localDescription,
+            iceServers: relayOnly
+        }));
+
+        signaling.onmessage = async (e) => {
+            const msg = JSON.parse(await e.data.text());
+            if (msg.type === "answer" && msg.sdp) {
+                await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+                console.log("📦 Received SDP answer");
+            }
+            if (msg.candidate) {
+                await pc.addIceCandidate(new RTCIceCandidate(msg.candidate));
+            }
+        };
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head><title>Receiver</title></head>
+<body>
+<h2>Receiver</h2>
+<video id="remoteVideo" autoplay playsinline muted style="width: 480px;"></video>
+
+<script type="module">
+    const remoteVideo = document.getElementById('remoteVideo');
+    const signaling = new WebSocket('ws://localhost:3000?room=room1');
+
+    let pc;
+    let remoteDescSet = false;
+
+    signaling.onopen = () => {
+        console.log("✅ Signaling connected");
+    };
+
+    signaling.onmessage = async (e) => {
+        const msg = JSON.parse(await e.data.text());
+
+        if (msg.type === "offer" && msg.sdp && msg.iceServers) {
+            console.log("📦 Received SDP offer and TURN config");
+
+            // Use sender's ICE config
+            pc = new RTCPeerConnection({
+                iceServers: msg.iceServers,
+                iceTransportPolicy: "relay"
+            });
+
+            pc.ontrack = (e) => {
+                remoteVideo.srcObject = e.streams[0];
+                remoteVideo.play().catch(err => console.warn("⚠️ Autoplay failed", err));
+                console.log("🎥 Stream received");
+            };
+
+            pc.onicecandidate = (e) => {
+                if (e.candidate) signaling.send(JSON.stringify({ candidate: e.candidate }));
+            };
+
+            await pc.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+            remoteDescSet = true;
+
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+
+            signaling.send(JSON.stringify({
+                type: "answer",
+                sdp: pc.localDescription
+            }));
+            console.log("✅ Sent SDP answer");
+        }
+
+        if (msg.candidate && pc && remoteDescSet) {
+            await pc.addIceCandidate(new RTCIceCandidate(msg.candidate));
+            console.log("📥 ICE candidate added");
+        }
+    };
+</script>
+</body>
+</html>
